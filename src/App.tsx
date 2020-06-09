@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import rawData from "data.json";
-import { isoParse, timeFormat } from "d3-time-format";
+import { isoParse } from "d3-time-format";
 import { scaleLinear, scaleTime } from "d3-scale";
 import { AxisLeft, AxisBottom } from "@vx/axis";
 import { Group } from "@vx/group";
@@ -15,6 +15,7 @@ const margin = { top: 10, right: 30, bottom: 60, left: 60 };
 const width = 900;
 const height = 600;
 const padding = 50;
+const label = "Price in USD";
 
 const computeExtent = (arr: number[]) => {
   const min = arr.reduce((acc, cur) => Math.min(acc, cur), Infinity);
@@ -56,8 +57,18 @@ function App() {
         height: "100vh",
         display: "flex",
         justifyContent: "center",
+        flexDirection: "column",
       }}
     >
+      <h1
+        style={{
+          fontFamily: "Arial",
+          color: "#8D86C9",
+          marginLeft: margin.left,
+        }}
+      >
+        Bitcoin prices over the last 30 days
+      </h1>
       <svg width={width + margin.right + margin.left} height={height}>
         <Group left={margin.left} top={margin.top}>
           <GridRows
@@ -87,6 +98,17 @@ function App() {
             })}
             {...textStyles}
             hideAxisLine
+            label={label}
+            labelProps={{
+              x: -50,
+              y: -70,
+              fill: "#F7ECE1",
+              fontSize: 11,
+              strokeWidth: 0,
+              fontFamily: "sans-serif",
+              textAnchor: "end",
+              opacity: 0.8,
+            }}
           />
           <path d={linePath} {...lineStyles} />
           <rect />
