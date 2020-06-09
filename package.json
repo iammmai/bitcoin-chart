@@ -12,6 +12,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/styled-components": "^5.1.0",
     "@vx/axis": "0.0.197",
+    "@vx/grid": "0.0.197",
     "@vx/group": "0.0.197",
     "@vx/mock-data": "0.0.197",
     "@vx/scale": "0.0.197",

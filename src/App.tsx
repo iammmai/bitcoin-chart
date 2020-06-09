@@ -5,13 +5,16 @@ import { scaleLinear, scaleTime } from "d3-scale";
 import { AxisLeft, AxisBottom } from "@vx/axis";
 import { Group } from "@vx/group";
 import { line, curveCardinal } from "d3-shape";
+import { textStyles, lineStyles, gridStyles } from "styleConfig";
+import { GridRows } from "@vx/grid";
+import "index.css";
 
 type Datum = { date: Date; price: number };
 
-const margin = { top: 10, right: 30, bottom: 30, left: 60 };
+const margin = { top: 10, right: 30, bottom: 60, left: 60 };
 const width = 900;
 const height = 600;
-const background = "#f3f3f3";
+const padding = 50;
 
 const computeExtent = (arr: number[]) => {
   const min = arr.reduce((acc, cur) => Math.min(acc, cur), Infinity);
@@ -19,7 +22,6 @@ const computeExtent = (arr: number[]) => {
   return [min, max];
 };
 
-const formatTime = timeFormat("%s");
 const myData = Object.entries(rawData.bpi).map(([date, price]) => ({
   date: isoParse(date) as Date,
   price,
@@ -30,8 +32,9 @@ const xAcc = (d: Datum) => (d.date as Date).valueOf();
 const yAcc = (d: Datum) => d.price;
 
 // scales
+const [minY, maxY] = computeExtent(myData.map(yAcc));
 const yScale = scaleLinear()
-  .domain(computeExtent(myData.map(yAcc)))
+  .domain([minY - padding, maxY])
   .range([height - margin.bottom, margin.top]);
 
 const xScale = scaleTime<number>()
@@ -41,45 +44,54 @@ const xScale = scaleTime<number>()
 const lineGen = line<Datum>()
   .x((d) => xScale(xAcc(d)))
   .y((d) => yScale(yAcc(d)))
-  .curve(curveCardinal);
+  .curve(curveCardinal.tension(0.5));
 
 const linePath = lineGen(myData) as string;
 
 function App() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   return (
-    <div className="App">
-      {JSON.stringify(position)}
-      <header className="App-header">
-        <div>
-          <svg width={width} height={height}>
-            <Group left={margin.left} top={margin.top}>
-              <rect
-                width={width}
-                height={width}
-                fill={background}
-                onMouseMove={(e) => {
-                  e.persist();
-                  setPosition({
-                    x: e.clientX - margin.left,
-                    y: e.clientY - margin.top,
-                  });
-                  console.log(e);
-                }}
-              />
-              <circle cx={position.x} cy={position.y} color="red" r="3" />
-              <AxisBottom
-                top={height - margin.bottom}
-                scale={xScale}
-                numTicks={10}
-              />
-              <AxisLeft scale={yScale} left={margin.left} />
-              <path d={linePath} stroke="black" strokeWidth="1px" fill="none" />
-              <rect />
-            </Group>
-          </svg>
-        </div>
-      </header>
+    <div
+      style={{
+        backgroundColor: "#242038",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <svg width={width + margin.right + margin.left} height={height}>
+        <Group left={margin.left} top={margin.top}>
+          <GridRows
+            scale={yScale}
+            width={width - margin.right}
+            {...gridStyles}
+          />
+          <AxisBottom
+            top={height - margin.bottom}
+            scale={xScale}
+            numTicks={10}
+            tickLabelProps={() => ({
+              ...textStyles,
+              stroke: "none",
+              fontSize: 11,
+            })}
+            {...textStyles}
+          />
+          <AxisLeft
+            scale={yScale}
+            left={margin.left}
+            tickLabelProps={() => ({
+              ...textStyles,
+              stroke: "none",
+              fontSize: 11,
+              dx: "-35px",
+            })}
+            {...textStyles}
+            hideAxisLine
+          />
+          <path d={linePath} {...lineStyles} />
+          <rect />
+        </Group>
+      </svg>
     </div>
   );
 }
